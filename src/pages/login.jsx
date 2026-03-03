@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { auth, db } from '../lib/firebase';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp, collection, query, where, getDocs } from 'firebase/firestore';
 import { Trophy, Plus, LogOut, Loader2 } from 'lucide-react';
 
 const generateTournamentId = () => {
@@ -21,6 +21,8 @@ export default function Login() {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [user, setUser] = useState(null);
+    const [tournaments, setTournaments] = useState([]);
+    const [loadingTournaments, setLoadingTournaments] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -29,6 +31,36 @@ export default function Login() {
         });
         return () => unsub();
     }, []);
+
+    useEffect(() => {
+        if (user) {
+            const fetchTournaments = async () => {
+                setLoadingTournaments(true);
+                try {
+                    const q = query(collection(db, 'tournaments'), where('adminUid', '==', user.uid));
+                    const querySnapshot = await getDocs(q);
+                    const fetchedTournaments = [];
+                    querySnapshot.forEach((doc) => {
+                        fetchedTournaments.push({ id: doc.id, ...doc.data() });
+                    });
+
+                    // Sort by createdAt descending
+                    fetchedTournaments.sort((a, b) => {
+                        const timeA = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
+                        const timeB = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+                        return timeB - timeA;
+                    });
+
+                    setTournaments(fetchedTournaments);
+                } catch (err) {
+                    console.error("Error fetching tournaments: ", err);
+                } finally {
+                    setLoadingTournaments(false);
+                }
+            };
+            fetchTournaments();
+        }
+    }, [user]);
 
     const handleAuth = async (e) => {
         e.preventDefault();
@@ -113,6 +145,33 @@ export default function Login() {
                     >
                         <LogOut className="w-5 h-5 mr-2" /> Sign Out
                     </button>
+
+                    {loadingTournaments ? (
+                        <div className="flex justify-center mt-8">
+                            <Loader2 className="w-8 h-8 animate-spin text-espn-red" />
+                        </div>
+                    ) : (
+                        tournaments.length > 0 && (
+                            <div className="mt-8 text-left">
+                                <h3 className="text-lg font-bold mb-4 border-b border-gray-700 pb-2">Your Tournaments</h3>
+                                <div className="space-y-3 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+                                    {tournaments.map(t => (
+                                        <button
+                                            key={t.id}
+                                            onClick={() => navigate(`/admin/${t.id}`)}
+                                            className="w-full bg-[#1e1e1e] hover:bg-gray-800 border border-gray-700 rounded-lg p-4 flex justify-between items-center transition-colors text-left"
+                                        >
+                                            <div>
+                                                <p className="font-bold text-white text-lg">{t.name}</p>
+                                                <p className="text-xs text-gray-400 mt-1 uppercase tracking-wide">ID: {t.id} • Status: {t.status}</p>
+                                            </div>
+                                            <Trophy className="w-5 h-5 text-gray-500" />
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        )
+                    )}
                 </div>
             </div>
         );
