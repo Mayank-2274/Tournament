@@ -8,7 +8,7 @@ export default function Layout() {
                 <div className="max-w-7xl mx-auto flex items-center justify-between">
                     <Link to="/" className="flex items-center space-x-2 text-white hover:text-espn-red transition-colors">
                         <Trophy className="w-6 h-6 text-espn-red" />
-                        <span className="text-xl font-bold tracking-tight">LIVE TOURNAMENTS</span>
+                        <span className="text-xl font-bold tracking-tight">TOURNAMENT APP</span>
                     </Link>
                     <div className="flex space-x-4">
                         <Link to="/login" className="text-sm font-semibold text-gray-300 hover:text-white transition-colors">
@@ -24,7 +24,7 @@ export default function Layout() {
 
             <footer className="bg-espn-black border-t border-espn-card mt-auto py-6">
                 <div className="max-w-7xl mx-auto px-4 text-center text-sm text-gray-500">
-                    <p>© {new Date().getFullYear()} Live Tournament Tracker. All rights reserved.</p>
+                    <p>© {new Date().getFullYear()} Live Tournament App. All rights reserved by Mayank Malviya.</p>
                 </div>
             </footer>
         </div>

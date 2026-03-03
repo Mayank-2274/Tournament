@@ -21,7 +21,7 @@ export default function Home() {
                     LIVE TOURNAMENT TRACKER
                 </h1>
                 <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-                    Create, manage, and view real-time tournament brackets, points tables, and live fixtures.
+                   Specially designed for CORE CODm Paglus by Mayank Malviya
                 </p>
             </div>
 
